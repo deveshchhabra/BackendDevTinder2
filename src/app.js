@@ -5,6 +5,7 @@ const User=require("./models/user")
 app.use(express.json())
 app.post('/signup',async(req,res)=>{
     const user=new User(req.body);
+    console.log(user)
     // const user=new User({
         
     //     firstName:"Akshay",
@@ -19,6 +20,66 @@ app.post('/signup',async(req,res)=>{
     }
     catch(err){
         res.status(400).send('Error Message',err.message);
+    }
+})
+
+app.get("/user",async(req,res)=>{
+    const userEmail=req.body.emailId;
+    console.log(userEmail)
+    
+    try{
+        const users=await User.findOne({emailId:"670518508c8fd5a149c8a9ca"});
+    if(!users){
+        res.status(404).send('User Not Found')
+    }
+    else{
+        res.send(users);
+    }
+//       if(users.length===1){
+// res.status(404).send('User Not Found')
+//       }else{
+//         res.send(user);
+//     }
+}
+    catch(err){
+        res.status(400).send("Something Went Wrong")
+    }
+})
+
+app.get("/feed",async(req,res)=>{
+    try{
+        const users= await User.find({})
+        res.send(users)
+    }
+    catch(err){
+        res.status(404).send("Something Went Wrong")
+    }
+})
+app.delete("/user",async(req,res)=>{
+    const UserId=req.body.userId;
+    // console.log(UserId)
+    try{
+        const user=await User.findByIdAndDelete(UserId);
+        console.log(user);
+        res.send("User Deleted Successfully")
+    }
+    catch(err){
+res.status(400).send("something Went wrong");
+    }
+})
+app.patch("/user",async(req,res)=>{
+    const UserId=req.body.userId;
+    const data=req.body;
+    // console.log(data);
+    try{
+const user=await User.findByIdAndUpdate({_id:UserId},data,{
+    runValidators:true,
+});
+console.log(user)
+res.send("user updated sucessfully");
+    }
+    catch(err){
+        res.status(400).send("something went wrong"+err.message);
     }
 })
 connectDB().then(()=>{
