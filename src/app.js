@@ -1,116 +1,100 @@
-const express=require('express');//It is code comming Node.Js
-const connectDB=require('./config/database');
-const app=express();
-const User=require("./models/user")
+const express = require('express') //It is code comming Node.Js
+const connectDB = require('./config/database')
+const app = express()
+const User = require('./models/user')
 app.use(express.json())
-app.post('/signup',async(req,res)=>{
-    const user=new User(req.body);
+app.post('/signup', async (req, res) => {
+  const user = new User(req.body)
+  console.log(user)
+  // const user=new User({
+
+  //     firstName:"Akshay",
+  //     lastName:"Saini",
+  //     emailId:"aksahaysain@gmail.com",
+  //     password:"akshay@123",
+  // })
+  try {
+    await user.save()
+    res.send('User Added Sucessfully')
+  } catch (err) {
+    res.status(400).send('Error Message', err.message)
+  }
+})
+
+app.get('/user', async (req, res) => {
+  const userEmail = req.body.emailId
+  console.log(userEmail)
+
+  try {
+    const users = await User.findOne({ emailId: '670518508c8fd5a149c8a9ca' })
+    if (!users) {
+      res.status(404).send('User Not Found')
+    } else {
+      res.send(users)
+    }
+    //       if(users.length===1){
+    // res.status(404).send('User Not Found')
+    //       }else{
+    //         res.send(user);
+    //     }
+  } catch (err) {
+    res.status(400).send('Something Went Wrong')
+  }
+})
+
+app.get('/feed', async (req, res) => {
+  try {
+    const users = await User.find({})
+    res.send(users)
+  } catch (err) {
+    res.status(404).send('Something Went Wrong')
+  }
+})
+app.delete('/user', async (req, res) => {
+  const UserId = req.body.userId
+  // console.log(UserId)
+  try {
+    const user = await User.findByIdAndDelete(UserId)
     console.log(user)
-    // const user=new User({
-        
-    //     firstName:"Akshay",
-    //     lastName:"Saini",
-    //     emailId:"aksahaysain@gmail.com",
-    //     password:"akshay@123",
-    // })
-    try{
-
-        await user.save();  
-        res.send('User Added Sucessfully')
-    }
-    catch(err){
-        res.status(400).send('Error Message',err.message);
-    }
+    res.send('User Deleted Successfully')
+  } catch (err) {
+    res.status(400).send('something Went wrong')
+  }
 })
+app.patch('/user/:userId', async (req, res) => {
+  const UserId = req.params?.userId
+  const data = req.body
 
-app.get("/user",async(req,res)=>{
-    const userEmail=req.body.emailId;
-    console.log(userEmail)
-    
-    try{
-        const users=await User.findOne({emailId:"670518508c8fd5a149c8a9ca"});
-    if(!users){
-        res.status(404).send('User Not Found')
-    }
-    else{
-        res.send(users);
-    }
-//       if(users.length===1){
-// res.status(404).send('User Not Found')
-//       }else{
-//         res.send(user);
-//     }
-}
-    catch(err){
-        res.status(400).send("Something Went Wrong")
-    }
+  try {
+     const ALLOWED_UPDATES = ["photoUrl", "about", "gender", "age", "skills"];
+     const isUpdateAllowed = Object.keys(data).map((k)=>{
+       ALLOWED_UPDATES.includes(k)
+     }
+     );
+     if (!isUpdateAllowed) {
+       throw new Error("Update not allowed");
+     }
+     if(data?.skills.length>10){
+        throw new Error("Not More Than 10")
+     }
+    const user = await User.findByIdAndUpdate({ _id: UserId }, data, {
+      runValidators: true
+    })
+    res.send('user updated sucessfully')
+  } catch (err) {
+    res.status(400).send('something went wrong' + err.message)
+  }
 })
-
-app.get("/feed",async(req,res)=>{
-    try{
-        const users= await User.find({})
-        res.send(users)
-    }
-    catch(err){
-        res.status(404).send("Something Went Wrong")
-    }
-})
-app.delete("/user",async(req,res)=>{
-    const UserId=req.body.userId;
-    // console.log(UserId)
-    try{
-        const user=await User.findByIdAndDelete(UserId);
-        console.log(user);
-        res.send("User Deleted Successfully")
-    }
-    catch(err){
-res.status(400).send("something Went wrong");
-    }
-})
-app.patch("/user",async(req,res)=>{
-    const UserId=req.body.userId;
-    const data=req.body;
-    // console.log(data);
-    try{
-const user=await User.findByIdAndUpdate({_id:UserId},data,{
-    runValidators:true,
-});
-console.log(user)
-res.send("user updated sucessfully");
-    }
-    catch(err){
-        res.status(400).send("something went wrong"+err.message);
-    }
-})
-connectDB().then(()=>{
-    console.log("Mongoose connection sucessfully")
-    app.listen(3000,()=>{
-        console.log("Server is SuccessFull....3000")
-    });
-})
-.catch((err)=>{console.log("Database is cannot connected",err)})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+connectDB()
+  .then(() => {
+    console.log('Mongoose connection sucessfully')
+    app.listen(3000, () => {
+      console.log('Server is SuccessFull....3000')
+    })
+  })
+  .catch(err => {
+    console.log('Database is cannot connected', err)
+  })
 
 // app.use('/',(req,res)=>{
 //     res.send("Jai shree shyam!")
@@ -132,4 +116,3 @@ connectDB().then(()=>{
 //         res.send("Jai shree Ram")})
 // app.use('/',(req,res)=>{
 //     res.send("Nameste DEV")})
-
