@@ -1,10 +1,17 @@
-const express = require('express') //It is code comming Node.Js
-const connectDB = require('./config/database')
-const app = express()
-const User = require('./models/user')
-const bcrypt=require('bcrypt')
+const express=require('express');//It is code comming Node.Js
+const connectDB=require('./config/database');
+const app=express();
+const User=require("./models/user")
 app.use(express.json())
 const  {validateSignUpData}=require("./utils/validation")
+
+const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middleware/auth");
+
+app.use(express.json());
+app.use(cookieParser());
 //Akshay@123 "#wspquregt@123"
 app.post('/signup', async (req, res) => {
   //validation of the data
@@ -31,6 +38,11 @@ app.post('/login', async (req, res) => {
   }
   const isPasswordValid=await bcrypt.compare(password,user.password)
   if(isPasswordValid){
+    const token = await jwt.sign({ _id: user._id }, "DEV@Tinder$790",{
+        expiresIn:"0d"
+    });
+    // Add the token to cookie and send the response back to the user
+    res.cookie("token", token, { expires: new Date(Date.now() + 8*3600000)});
     res.send("Login in Successfully")
   }
   else {
@@ -42,6 +54,36 @@ catch (err) {
   res.status(400).send("ERROR : " + err.message);
 }
 });
+ // try {
+    //   const cookies = req.cookies;
+    //   const { token } = cookies;
+    //   if (!token) {
+    //     throw new Error("Invalid Token");
+    //   }
+    //   const decodedMessage = await jwt.verify(token, "DEV@Tinder$790");
+    //   const { _id } = decodedMessage;
+    //   const user = await User.findById(_id);
+    //   if (!user) {
+    //     throw new Error("User does not exist");
+    //   }
+    //   res.send(user);
+    // } catch (err) {
+    //   res.status(400).send("ERROR : " + err.message);
+    // }
+app.get("/profile",userAuth, async (req, res) => {
+   
+    try{
+        const user=req.user;
+        res.send(user);
+    }
+    catch (err) {
+          res.status(400).send("ERROR : " + err.message);
+        }
+  });
+app.post("/sendConnectionRequest",userAuth,async(req,res)=>{
+    const user=req.user;
+    res.send('sending Connection request: '+user.firstName);
+})
 app.get('/user', async (req, res) => {
   const userEmail = req.body.emailId
   console.log(userEmail)
@@ -137,3 +179,4 @@ connectDB()
 //         res.send("Jai shree Ram")})
 // app.use('/',(req,res)=>{
 //     res.send("Nameste DEV")})
+
