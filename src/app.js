@@ -18,7 +18,7 @@ app.post('/signup', async (req, res) => {
   try {
   validateSignUpData(req);
   const {firstName,lastName,emailId,password}=req.body
-  console.log(password);
+  
   const passwordHsh=await bcrypt.hash(password,10);
  
   const user = new User({firstName,lastName,emailId,password:passwordHsh})
@@ -36,11 +36,9 @@ app.post('/login', async (req, res) => {
   if(!user){
     throw new Error("EmailId is not present in Db");
   }
-  const isPasswordValid=await bcrypt.compare(password,user.password)
+  const isPasswordValid=await user.validatePassword(password);
   if(isPasswordValid){
-    const token = await jwt.sign({ _id: user._id }, "DEV@Tinder$790",{
-        expiresIn:"0d"
-    });
+    const token = await user.getJWT();
     // Add the token to cookie and send the response back to the user
     res.cookie("token", token, { expires: new Date(Date.now() + 8*3600000)});
     res.send("Login in Successfully")
@@ -80,9 +78,10 @@ app.get("/profile",userAuth, async (req, res) => {
           res.status(400).send("ERROR : " + err.message);
         }
   });
-app.post("/sendConnectionRequest",userAuth,async(req,res)=>{
-    const user=req.user;
-    res.send('sending Connection request: '+user.firstName);
+  app.post("/sendConnectionRequest",userAuth, async (req, res) => {
+    const user = req.user;
+    // Sending a connection request
+    res.send(user.firstName+'sent the connection')
 })
 app.get('/user', async (req, res) => {
   const userEmail = req.body.emailId
