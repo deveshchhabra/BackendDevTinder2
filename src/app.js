@@ -121,7 +121,7 @@ connectDB()
 //     console.log(req.query);
 //     res.send({firstname:"devesh",lastName:"Chhabra"})
 // })
-// app.post('/user',(req,res)=>~{
+// app.post('/user',(req,res)=>{
 //     res.send("Data successfully saved to database!!!");
 // })
 // app.delete("/user",(req,res)=>{
