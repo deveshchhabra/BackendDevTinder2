@@ -7,6 +7,7 @@ const userSchema=new mongoose.Schema(
         firstName:{type:String,
             required:true,
             minLength:4,
+            index:true,
             maxLength:50,
         },
         lastName:{type:String,
@@ -35,6 +36,10 @@ const userSchema=new mongoose.Schema(
           },
         age:{type:Number},
         gender:{type:String,
+          enum:{
+            values:["male","female","other"],
+        message:`{value} is invalid`
+        },
         validate(value){
             if(!["male","female","other"].includes(value)){
                 throw new Error("Gender is not valid")
@@ -55,7 +60,8 @@ const userSchema=new mongoose.Schema(
         },
         skills:{
             type:[String],
-                }
+                },
+     
 },
 {
     timestamps:true,
