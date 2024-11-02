@@ -4,10 +4,12 @@ const moongose=require("mongoose")
 const connectionRequestSchema=new moongose.Schema({
     fromUserId:{
         type:moongose.Schema.Types.ObjectId,
+        ref:"User",//reference to User collection
         required:true,
     },
     toUserId:{
         type:moongose.Schema.Types.ObjectId,
+        ref:"User",//reference to User collection
         required:true,
     },
     status:{

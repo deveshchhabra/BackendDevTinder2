@@ -44,38 +44,34 @@ res.json({
     }
   }
 )
-
+requestRouter.post(
+  "/request/review/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      const { status, requestId } = req.params;
+      const allowedStatus = ["accepted", "rejected"];
+      if (!allowedStatus.includes(status)) {
+        return res.status(400).json({ messaage: "Status not allowed!" });
+      }
+      const connectionRequest = await ConnectionRequestModel.findOne({
+        _id: requestId,
+        toUserId: loggedInUser._id,
+        status: "interested",
+      });
+      if (!connectionRequest) {
+        return res
+          .status(404)
+          .json({ message: "Connection request not found" });
+      }
+      connectionRequest.status = status;
+      const data = await connectionRequest.save();
+      
+      res.json({ message: "Connection request " + status, data });
+    } catch (err) {
+      res.status(400).send("ERROR: " + err.message);
+    }
+  }
+);
 module.exports = requestRouter;
-// requestRouter.post("/sendConnectionRequest", userAuth, async (req, res) => {
-//   const user = req.user;
-//   // Sending a connection request
-//   console.log("Sending a connection request");
-//   res.send(user.firstName + "sent the connect request!");
-// });
-// requestRouter.post(
-//   "/request/send/:status/:toUserId",
-//   userAuth,
-//   async (req, res) => {
-//     try {
-//       const fromUserId = req.user._id;
-//       const toUserId = req.params.toUserId;
-//       const status = req.params.status;
-
-//       const connectionRequest = new ConnectionRequestModel({
-//         fromUserId,
-//         toUserId,
-//         status,
-//       });
-//       const data = await connectionRequest.save();
-//       res.json({
-//         message:
-//           "Connection request Send Succesfully",
-//         data,
-//       });
-//     } catch (err) {
-//       res.status(400).send("ERROR: " + err.message);
-//     }
-//   }
-// );
-
-// module.exports = requestRouter;
