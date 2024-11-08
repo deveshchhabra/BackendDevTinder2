@@ -3,6 +3,7 @@ const userRouter=express.Router();
 const {userAuth} =require("../middleware/auth")
 const connectionRequest=require("../models/connectionRequest");
 const ConnectionRequestModel = require("../models/connectionRequest");
+
 const User = require("../models/user");
 userRouter.get("/user/requests/received",userAuth,async(req,res)=>{
     try{

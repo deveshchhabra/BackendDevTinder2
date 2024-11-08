@@ -1,7 +1,12 @@
 const express=require('express');//It is code comming Node.Js
 const connectDB=require('./config/database');
-const app=express();
+const app = express()
 const cookieParser = require("cookie-parser");
+const cors = require('cors')
+app.use(cors({
+  origin:"http://localhost:5173",
+  credentials:true
+}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.json());
@@ -21,7 +26,10 @@ app.use("/",profileRouter)
 app.use("/",requestRouter)
 app.use("/",userRouter)
 
-
+app.use(cors({
+  origin: 'http://localhost:5173', // Replace with the actual origin
+  credentials: true // Allows cookies and other credentials
+}));
 connectDB()
   .then(() => {
     console.log('Mongoose connection sucessfully')
