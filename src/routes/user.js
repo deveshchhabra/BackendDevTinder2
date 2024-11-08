@@ -19,7 +19,7 @@ userRouter.get("/user/requests/received",userAuth,async(req,res)=>{
         res.status(404).send("ERROR:"+err.message);
     }
 })
-const USER_SAFE_DATA="firstName lastName email"
+const USER_SAFE_DATA = "firstName lastName photoUrl age gender about skills";
 userRouter.get("/user/connections",userAuth,async(req,res)=>{
     try{
         const loggedInUser=req.user;
@@ -70,13 +70,14 @@ userRouter.get("/feed",userAuth,async(req,res)=>{
           hideUsersFromFeed.add(req.fromUserId.toString());
           hideUsersFromFeed.add(req.toUserId.toString());
         });
-        console.log(hideUsersFromFeed)
+        console.log(User)
         const users = await User.find({
             $and: [
               { _id: { $nin: Array.from(hideUsersFromFeed) } },
               { _id: { $ne: loggedInUser._id } },
             ],
           }).select(USER_SAFE_DATA).skip(skip).limit(limit);
+        //   console.log(users)
         res.json({data:users});
     }catch(err){
         res.status(400).json({message:err.message});
